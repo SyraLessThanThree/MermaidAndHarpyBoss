@@ -26,15 +26,16 @@ public sealed class VengefulPower : CustomPowerModel {
 
     public override Task BeforeDeath(Creature creatureThatDied) {
         IMonsterPair? meMonsterPair = Owner.Monster as IMonsterPair;
-        Creature? partner = meMonsterPair?.Partner;
+        Creature? partner = meMonsterPair?.Partner as Creature;
         
         
         return Task.Run(action: async void () => {
-            MermaidAndHarpyBossMainFile.Logger.Info($"\nOwner:{Owner.Name}\n  creatureThatDied:{creatureThatDied.Name}\n  Partner:{partner?.Name ?? "null"}\n  mermaidOrHarpy:{(meMonsterPair as MonsterModel)?.Creature.Name}");
+            MermaidAndHarpyBossMainFile.Logger.Info($"\nVengefulPower:{Owner.Name}\n  creatureThatDied:{creatureThatDied.Name}\n  Partner:{partner?.Name ?? "null"}\n  mermaidOrHarpy:{(meMonsterPair as MonsterModel)?.Creature.Name}");
             
             if(!(meMonsterPair?.IsPartner(creatureThatDied)??false)) return;
             
             MermaidAndHarpyBossMainFile.Logger.Info($"{creatureThatDied.Name} died, {Owner.Name} Ringing");
+            meMonsterPair.BrokenOn = CombatState.RoundNumber;
             
             foreach (var player in Owner.CombatState.Players) {
                 await PowerCmd.Apply<RingingPower>(player.Creature,1m,Owner,null);
